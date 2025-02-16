@@ -14,7 +14,7 @@ def classify_with_gpt(image):
     image_bytes = image_bytes.getvalue()
 
     # Call OpenAI Vision API
-    response = openai.ChatCompletion.create(
+    response = openai.client.chat.completions.create(
         model="gpt-4-turbo",
         messages=[
             {
@@ -33,7 +33,7 @@ def classify_with_gpt(image):
     )
 
     # Extract response
-    return response["choices"][0]["message"]["content"]
+    return response.choices[0].message.content
 
 # Streamlit UI
 st.title("🐱🐶 Cat vs Dog Classifier (GPT-4 Vision)")
