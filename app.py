@@ -4,7 +4,7 @@ from PIL import Image
 import io
 
 # Set up OpenAI API Key
-openai.api_key = "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"  # Replace with your actual API key
+openai.api_key = "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"  # Replace with your actual API key
 
 # Function to classify the image using GPT-4 Vision API
 def classify_with_gpt(image):
