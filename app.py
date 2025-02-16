@@ -25,7 +25,7 @@ st.write("Upload an image of a cat or a dog and the model will predict which one
 uploaded_file = st.file_uploader("Choose an image...", type="jpg")
 
 if uploaded_file is not None:
-    st.image(uploaded_file, caption='Uploaded Image.', use_container_width=True)
+    st.image(uploaded_file, caption='Uploaded Image.')
     st.write("")
     st.write("Classifying...")
     label = predict(uploaded_file)
