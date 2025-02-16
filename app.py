@@ -1,32 +1,55 @@
 import streamlit as st
-import tensorflow as tf
-from tensorflow.keras.preprocessing.image import img_to_array, load_img
-import numpy as np
-import pickle
+import openai
+from PIL import Image
+import io
 
-# Load the full model using pickle
-with open("cat_dog_classifier.pkl", "rb") as f:
-    model = pickle.load(f)
+# Set up OpenAI API Key
+openai.api_key = "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"  # Replace with your actual API key
 
-# Compile the model
-model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+# Function to classify the image using GPT-4 Vision API
+def classify_with_gpt(image):
+    # Convert image to bytes
+    image_bytes = io.BytesIO()
+    image.save(image_bytes, format="JPEG")
+    image_bytes = image_bytes.getvalue()
 
-def predict(image):
-    img = load_img(image, target_size=(150, 150))
-    img = img_to_array(img)
-    img = np.expand_dims(img, axis=0)
-    img = img / 255.0
-    prediction = model.predict(img)
-    return 'Dog' if prediction[0][0] > 0.5 else 'Cat'
+    # Call OpenAI Vision API
+    response = openai.ChatCompletion.create(
+        model="gpt-4-turbo",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are an expert image classifier that identifies whether an image contains a cat or a dog."
+            },
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": "Is this a cat or a dog? Answer with just 'Cat' or 'Dog'."},
+                    {"type": "image", "image": image_bytes}
+                ]
+            }
+        ],
+        max_tokens=5  # Short response
+    )
 
-st.title("Cat vs Dog Classifier")
-st.write("Upload an image of a cat or a dog and the model will predict which one it is.")
+    # Extract response
+    return response["choices"][0]["message"]["content"]
 
-uploaded_file = st.file_uploader("Choose an image...", type="jpg")
+# Streamlit UI
+st.title("🐱🐶 Cat vs Dog Classifier (GPT-4 Vision)")
+st.write("Upload an image, and GPT-4 Vision will classify it as a Cat or Dog.")
+
+uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png", "jpeg"])
 
 if uploaded_file is not None:
-    st.image(uploaded_file, caption='Uploaded Image.', use_column_width=True)
-    st.write("")
-    st.write("Classifying...")
-    label = predict(uploaded_file)
-    st.write(f"The image is classified as: {label}")
+    # Display uploaded image
+    image = Image.open(uploaded_file)
+    st.image(image, caption="Uploaded Image", use_column_width=True)
+
+    # Classify image using GPT-4 Vision
+    st.write("🔍 **Classifying...**")
+    with st.spinner("Processing with GPT..."):
+        label = classify_with_gpt(image)
+
+    # Display classification result
+    st.write(f"✅ **The image is classified as:** {label}")
