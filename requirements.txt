@@ -1,6 +1,5 @@
 streamlit
+openai
+pillow
 tensorflow
 numpy
-pillow
-pickle-mixin
-openai
